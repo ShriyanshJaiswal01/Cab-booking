@@ -12,7 +12,13 @@ const rideRoutes = require('./routes/ride.route');
 
 connectToDb();
                   
-app.use(cors());
+// app.use(cors());
+app.use(cors({
+  origin: "https://cab-booking-1-9tva.onrender.com",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
