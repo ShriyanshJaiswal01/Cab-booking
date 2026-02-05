@@ -17,7 +17,8 @@ app.use(cors({
   origin: [
     "https://cab-booking-1-9tva.onrender.com"
   ],
-  credentials: true
+  credentials: true,
+   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
 
 
