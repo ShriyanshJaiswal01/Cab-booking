@@ -14,8 +14,9 @@ connectToDb();
                   
 // app.use(cors());
 app.use(cors({
-  origin: "https://cab-booking-1-9tva.onrender.com",
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: [
+    "https://cab-booking-1-9tva.onrender.com"
+  ],
   credentials: true
 }));
 
