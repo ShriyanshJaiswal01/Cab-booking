@@ -11,9 +11,7 @@ const mapsRoutes = require('./routes/maps.route');
 const rideRoutes = require('./routes/ride.route');
 
 connectToDb();
-
-
-
+                  
 app.use(cors());
 
 app.use(express.json());

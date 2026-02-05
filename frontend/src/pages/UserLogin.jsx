@@ -1,4 +1,4 @@
-import React, { useState,useContext } from 'react'
+import React, { useState,useContext,useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {UserDataContext} from '../context/UserContext'
 import { useNavigate } from 'react-router-dom'
@@ -8,10 +8,15 @@ const UserLogin = () => {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+   const [inputKey, setInputKey] = useState(0)
   const [userData,setUserData] = useState({})
 
   const { user, setUser } = useContext(UserDataContext)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    setInputKey(prev => prev + 1)
+  }, [])
 
   const submitHandler = async (e) => {
     e.preventDefault()
@@ -42,13 +47,15 @@ const UserLogin = () => {
       }}>
         <h3 className='text-lg font-medium mb-2'>What's your email</h3>
         <input
+         key={inputKey}
          required
          value={email}
          onChange={(e) =>
            setEmail(e.target.value)
           }
+         autoComplete="off"
          className='bg-[#eeeee] mb-7 rounded px-4 py-2 border w-full text-lg placeholder:text-base'
-         type="email" 
+         type="email"
          placeholder='email@example.com' 
         />
 
@@ -61,7 +68,8 @@ const UserLogin = () => {
            setPassword(e.target.value)
           }
         className='bg-[#eeeee] mb-7 rounded px-4 py-2 border w-full text-lg placeholder:text-base'
-        type="password" 
+        type="password"
+        autoComplete="off" 
         placeholder='password' 
         />
 

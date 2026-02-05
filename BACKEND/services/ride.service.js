@@ -9,35 +9,49 @@ async function getFare(pickup, destination) {
       throw new Error('Pickup and destination are required');
   }
 
-  const distanceTime = await mapService.getDistanceTime(pickup, destination);
+  try {
+    const pickupCoords = await mapService.getAddressCoordinate(pickup);
+    const destCoords = await mapService.getAddressCoordinate(destination);
 
-  const baseFare = {
-      auto: 30,
-      car: 50,
-      moto: 20
-  };
+    const originString = `${pickupCoords.lng},${pickupCoords.ltd}`;
+    const destinationString = `${destCoords.lng},${destCoords.ltd}`;
 
-  const perKmRate = {
-      auto: 10,
-      car: 15,
-      moto: 8
-  };
+    const distanceTime = await mapService.getDistanceTime(originString, destinationString);
 
-  const perMinuteRate = {
-      auto: 2,
-      car: 3,
-      moto: 1.5
-  };
+    const baseFare = {
+        auto: 30,
+        car: 50,
+        moto: 20
+    };
 
+    const perKmRate = {
+        auto: 10,
+        car: 15,
+        moto: 8
+    };
 
+    const perMinuteRate = {
+        auto: 2,
+        car: 3,
+        moto: 1.5
+    };
 
-  const fare = {
-      auto: Math.round(baseFare.auto + ((distanceTime.distance.value / 1000) * perKmRate.auto) + ((distanceTime.duration.value / 60) * perMinuteRate.auto)),
-      car: Math.round(baseFare.car + ((distanceTime.distance.value / 1000) * perKmRate.car) + ((distanceTime.duration.value / 60) * perMinuteRate.car)),
-      moto: Math.round(baseFare.moto + ((distanceTime.distance.value / 1000) * perKmRate.moto) + ((distanceTime.duration.value / 60) * perMinuteRate.moto))
-  };
+    const fare = {
+        auto: Math.round(baseFare.auto + ((distanceTime.distance.value / 1000) * perKmRate.auto) + ((distanceTime.duration.value / 60) * perMinuteRate.auto)),
+        car: Math.round(baseFare.car + ((distanceTime.distance.value / 1000) * perKmRate.car) + ((distanceTime.duration.value / 60) * perMinuteRate.car)),
+        moto: Math.round(baseFare.moto + ((distanceTime.distance.value / 1000) * perKmRate.moto) + ((distanceTime.duration.value / 60) * perMinuteRate.moto))
+    };
 
-  return fare;
+    return fare;
+  } catch (err) {
+    console.error('Error calculating fare:', err.message);
+    // Return default fare if API fails
+    return {
+        auto: 50,
+        car: 100,
+        moto: 40
+    };
+  }
 }
 
 module.exports.getFare = getFare;

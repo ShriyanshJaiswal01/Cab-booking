@@ -44,19 +44,25 @@ const Home = () => {
         socket.emit("join", { userType: "user", userId: user._id })
     }, [ user ])
 
-    socket.on('ride-confirmed', ride => {
+    useEffect(() => {
+        socket.on('ride-confirmed', (rideData) => {
+            console.log('Ride confirmed received:', rideData);
+            setVehicleFound(false)
+            setWaitingForDriver(true)
+            setRide(rideData)
+        })
 
+        socket.on('ride-started', (rideData) => {
+            console.log("ride started:", rideData)
+            setWaitingForDriver(false)
+            navigate('/riding', { state: { ride: rideData } })
+        })
 
-        setVehicleFound(false)
-        setWaitingForDriver(true)
-        setRide(ride)
-    })
-
-    socket.on('ride-started', ride => {
-        console.log("ride")
-        setWaitingForDriver(false)
-        navigate('/riding', { state: { ride } }) // Updated navigate to include ride data
-    })
+        return () => {
+            socket.off('ride-confirmed')
+            socket.off('ride-started')
+        }
+    }, [ socket, navigate ])
 
 
     const handlePickupChange = async (e) => {

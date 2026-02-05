@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import CaptainDetails from '../components/CaptainDetails'
 import RidePopUp from '../components/RidePopUp'
 import { useGSAP } from '@gsap/react'
@@ -20,9 +20,35 @@ const CaptainHome = () => {
   const confirmRidePopUpPanelRef = useRef(null)
 
   const { socket } = useContext(SocketContext)
-  const { captain } = useContext(CaptainDataContext)
+//   change
+  const { captain,setCaptain } = useContext(CaptainDataContext)
 
   useEffect(() => {
+        const fetchCaptainProfile = async () => {
+            try {
+                const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/captain/profile`, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                })
+                // API returns the captain object directly, not nested under .captain
+                setCaptain(response.data)
+            } catch (err) {
+                console.error("Failed to fetch captain profile", err)
+            }
+        }
+
+        fetchCaptainProfile()
+    }, [])
+//   change end
+
+  useEffect(() => {
+
+    // if (!captain) return;
+    if (!captain || !captain._id) {
+        return; 
+    }   
+
     socket.emit('join', {
         userId: captain._id,
         userType: 'captain'
@@ -30,6 +56,7 @@ const CaptainHome = () => {
     const updateLocation = () => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(position => {
+                
 
                 socket.emit('update-location-captain', {
                     userId: captain._id,
@@ -45,15 +72,33 @@ const CaptainHome = () => {
     const locationInterval = setInterval(updateLocation, 10000)
     updateLocation()
 
-    // return () => clearInterval(locationInterval)
-}, [])
+    return () => clearInterval(locationInterval)
+}, [captain])
 
-socket.on('new-ride', (data) => {
+useEffect(() => {
+    socket.on('new-ride', (data) => {
+        console.log('New ride received:', data);
+        setRide(data);
+        setRidePopUpPanel(true);
+    });
 
-  setRide(data)
-  setRidePopUpPanel(true)
+    return () => {
+        socket.off('new-ride');
+    }
+}, [socket])
 
-})
+    // Listen for ride-started event to update captain UI / navigate to riding screen
+    const navigate = useNavigate()
+    useEffect(() => {
+        socket.on('ride-started', (rideData) => {
+            console.log('Captain received ride-started:', rideData)
+            navigate('/captain-riding', { state: { ride: rideData } })
+        })
+
+        return () => {
+            socket.off('ride-started')
+        }
+    }, [socket, navigate])
 
 async function confirmRide() {
 
@@ -115,7 +160,8 @@ async function confirmRide() {
       <div className='h-2/5 p-6'>
       <CaptainDetails/>
       </div>
-      <div ref={ridePopUpPanelRef}  className='fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-10 pt-12'>
+      <div ref={ridePopUpPanelRef}  className='fixed w-full z-10 bottom-0 translate-y-full 
+      bg-white px-3 py-10 pt-12'>
         <RidePopUp
         ride={ride}
         setRidePopUpPanel={setRidePopUpPanel}
@@ -124,7 +170,8 @@ async function confirmRide() {
         />
       </div>
 
-      <div ref={confirmRidePopUpPanelRef}  className='fixed w-full h-screen z-10 bottom-0 translate-y-full bg-white px-3 py-10 pt-12'>
+      <div ref={confirmRidePopUpPanelRef}  className='fixed w-full h-screen z-10 bottom-0 
+      translate-y-full bg-white px-3 py-10 pt-12'>
         <ConfirmRidePopUp
         ride={ride}
         setConfirmRidePopUpPanel={setConfirmRidePopUpPanel}

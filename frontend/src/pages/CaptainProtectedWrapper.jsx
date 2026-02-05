@@ -12,29 +12,39 @@ const CaptainProtectWrapper = ({
     const { captain, setCaptain } = useContext(CaptainDataContext)
     const [ isLoading, setIsLoading ] = useState(true)
 
-
-
-
     useEffect(() => {
         if (!token) {
             navigate('/captain-login')
+            return;
         }
 
+        let isMounted = true;
+        
         axios.get(`${import.meta.env.VITE_BASE_URL}/captain/profile`, {
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                'Pragma': 'no-cache',
+                'Cache-Control': 'no-cache, no-store, must-revalidate'
+            },
+            params: {
+                _t: Date.now()
             }
         }).then(response => {
-            if (response.status === 200) {
-                setCaptain(response.data.captain)
-                setIsLoading(false)
+            if (!isMounted) return;
+            if (response.data) {
+                setCaptain(response.data);
+                setIsLoading(false);
             }
         })
             .catch(err => {
-
+                if (!isMounted) return;
                 localStorage.removeItem('token')
                 navigate('/captain-login')
             })
+
+        return () => {
+            isMounted = false;
+        }
     }, [ token ])
 
     

@@ -57,16 +57,21 @@ const captainSchema = new mongoose.Schema({
     }
   },
   location:{
-    ltd:{
-      type: Number
-      
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
     },
-    lng:{
-      type: Number
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      default: [0, 0]
     }
   }
 
 });
+
+// Create geospatial index for location-based queries
+captainSchema.index({ location: '2dsphere' });
 
 captainSchema.methods.generateAuthToken = function(){
   const token = jwt.sign({_id: this._id}, process.env.JWT_PRIVATE_KEY, {expiresIn: '24h'});
@@ -80,6 +85,6 @@ captainSchema.statics.hashPassword = async function(password){
   return await bcrypt.hash(password, 10);
 }
 
-const captainModel = mongoose.model('Captain', captainSchema); 
+const captainModel = mongoose.model('captain', captainSchema); 
 
 module.exports = captainModel;

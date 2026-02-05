@@ -3,6 +3,7 @@ const {validationResult} = require('express-validator');
 const mapService = require('../services/maps.service');
 const { sendMessageToSocketId } = require('../socket');
 const rideModel = require('../models/ride.model');
+const captainModel = require('../models/captain.model');
 
 module.exports.createRide = async (req,res) =>{
   const errors = validationResult(req);
@@ -14,26 +15,29 @@ module.exports.createRide = async (req,res) =>{
 
   try{
     const ride = await rideService.createRide({user: req.user._id,pickup,destination,vehicleType});
-    return res.status(201).json(ride);
 
     const pickupCoordinates = await mapService.getAddressCoordinate(pickup);
 
     const captainsInRadius = await mapService.getCaptainsInTheRadius(pickupCoordinates.ltd, pickupCoordinates.lng, 2);
 
+    console.log('Captains in radius:', captainsInRadius.length);
+    console.log('Captains data:', captainsInRadius);
+
     ride.otp = ""
     const rideWithUser = await rideModel.findOne({ _id: ride._id }).populate('user');
 
-
     captainsInRadius.map(captain => {
-
+      console.log('Sending ride to captain with socketId:', captain.socketId);
       sendMessageToSocketId(captain.socketId, {
           event: 'new-ride',
           data: rideWithUser
       })
+    })
 
-  })
+    return res.status(201).json(ride);
 
   }catch(err){
+    console.log('Error in createRide:', err);
     return res.status(500).json({message:err.message});
   }
 }
@@ -87,16 +91,30 @@ module.exports.startRide = async (req, res) => {
   const { rideId, otp } = req.query;
 
   try {
-      const ride = await rideService.startRide({ rideId, otp, captain: req.captain });
+        const ride = await rideService.startRide({ rideId, otp, captain: req.captain });
 
-      console.log(ride);
+        console.log('startRide result:', ride);
 
-      sendMessageToSocketId(ride.user.socketId, {
+        // Notify the user that the ride has started
+        sendMessageToSocketId(ride.user.socketId, {
           event: 'ride-started',
           data: ride
-      })
+        })
 
-      return res.status(200).json(ride);
+        // Also notify the captain (if socketId available) so captain UI can update via socket
+        try {
+          console.log('Notifying captain, socketId:', req.captain?.socketId);
+          if (req.captain && req.captain.socketId) {
+            sendMessageToSocketId(req.captain.socketId, {
+              event: 'ride-started',
+              data: ride
+            })
+          }
+        } catch (notifyErr) {
+          console.log('Failed to notify captain via socket:', notifyErr);
+        }
+
+        return res.status(200).json(ride);
   } catch (err) {
       return res.status(500).json({ message: err.message });
   }

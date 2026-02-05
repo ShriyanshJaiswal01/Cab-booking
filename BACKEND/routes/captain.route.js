@@ -24,7 +24,13 @@ router.post('/login',[
 captainController.loginCaptain
 );
 
-router.get('/profile',authMiddleware.authCaptain,captainController.getCaptainProfile);
+router.get('/profile',authMiddleware.authCaptain,(req,res,next)=>{
+  // Disable caching for profile endpoint
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+},captainController.getCaptainProfile);
 
 router.get('/logout',authMiddleware.authCaptain,captainController.logoutCaptain);
 

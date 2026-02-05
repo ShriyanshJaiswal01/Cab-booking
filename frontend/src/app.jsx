@@ -4,7 +4,7 @@ import Start from './pages/Start';
 import UserLogin from './pages/UserLogin';
 import SignUp from './pages/UserSignUp';
 import CaptainLogin from './pages/CaptainLogin';
-import CaptainSignup from './pages/CaptainSignUp';
+import CaptainSignup from './pages/CaptainSignup';
 import Home from './pages/Home';
 import UserProtectedWrapper from './pages/UserProtectedWrapper';
 import UserLogout from './pages/UserLogout'; 

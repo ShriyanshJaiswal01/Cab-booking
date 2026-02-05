@@ -18,22 +18,23 @@ const ConfirmRidePopUp = (props) => {
       headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
       }
-  })
+    })
 
-  if (response.status === 200) {
-      props.setConfirmRidePopupPanel(false)
-      props.setRidePopupPanel(false)
-      navigate('/captain-riding', { state: { ride: props.ride } })
-  }
+    if (response.status === 200) {
+      const updatedRide = response.data
+      props.setConfirmRidePopUpPanel(false)
+      props.setRidePopUpPanel(false)
+      navigate('/captain-riding', { state: { ride: updatedRide } })
+    }
 
 
   }
 
   return (
     <div>
-       <h5 className='p-1 text-center w-[93%] absolute top-0 ' onClick={()=>{
+      <h5 className='p-1 text-center w-[93%] absolute top-0 ' onClick={()=>{
         props.setRidePopUpPanel(false)
-    }}><i className="text-3xl text-gray-400 ri-arrow-down-wide-line"></i></h5>
+      }}><i className="text-3xl text-gray-400 ri-arrow-down-wide-line"></i></h5>
     <h3 className='text-2xl font-semibold mb-5'>Confirm this Ride to Start</h3>
 
     <div className='flex items-center justify-between p-3 bg-yellow-400 rounded-lg mt-4'>
@@ -72,10 +73,10 @@ const ConfirmRidePopUp = (props) => {
     </div>
     <div className='mt-6 w-full'>
     <form onSubmit={submitHandler}>
-      <input valur={otp} onChange={(e)=>setOtp(e.target.value)} type="text" className='bg-[#eee] px-6 py-4 text-mono text-lg rounded-lg w-full mt-5' placeholder='Enter OTP' />
+      <input value={otp} onChange={(e)=>setOtp(e.target.value)} type="text" className='bg-[#eee] px-6 py-4 text-mono text-lg rounded-lg w-full mt-5' placeholder='Enter OTP' />
     <button className='mt-5 w-full flex justify-center mt-5 bg-green-600 text-white font-semibold p-2 rounded-lg'>Confirm</button>
 
-<button onClick={()=>{
+    <button onClick={()=>{
       props.setConfirmRidePopUpPanel(false)
       props.setRidePopUpPanel(false)
     }} className='mt-5 w-full mt-2 bg-red-600 text-white font-semibold p-2 rounded-lg'>Cancel</button> 

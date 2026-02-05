@@ -1,4 +1,4 @@
-const socketIo = require('socket.io');
+ const socketIo = require('socket.io');
 const userModel = require('./models/user.model');
 const captainModel = require('./models/captain.model');
 
@@ -18,11 +18,15 @@ function initializeSocket(server) {
 
         socket.on('join', async (data) => {
             const { userId, userType } = data;
+            
+            console.log('Join event received:', { userId, userType, socketId: socket.id });
 
             if (userType === 'user') {
                 await userModel.findByIdAndUpdate(userId, { socketId: socket.id });
+                console.log('User joined with socketId:', socket.id);
             } else if (userType === 'captain') {
                 await captainModel.findByIdAndUpdate(userId, { socketId: socket.id });
+                console.log('Captain joined with socketId:', socket.id);
             }
         });
 
@@ -34,12 +38,16 @@ function initializeSocket(server) {
                 return socket.emit('error', { message: 'Invalid location data' });
             }
 
+            console.log('Updating captain location:', { userId, location });
+            
             await captainModel.findByIdAndUpdate(userId, {
                 location: {
-                    ltd: location.ltd,
-                    lng: location.lng
+                    type: 'Point',
+                    coordinates: [location.lng, location.ltd]  // GeoJSON format: [longitude, latitude]
                 }
             });
+            
+            console.log('Captain location updated');
         });
 
         socket.on('disconnect', () => {

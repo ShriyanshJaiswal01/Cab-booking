@@ -8,7 +8,11 @@ const CaptainDetails = () => {
     return <p>Loading captain details...</p>;
   }
 
-  console.log(captain)
+  //  if (!captain) {
+  //   return <p>Loading captain details...</p>;
+  // }
+
+  // console.log(captain)
 
   return (
     <div>
