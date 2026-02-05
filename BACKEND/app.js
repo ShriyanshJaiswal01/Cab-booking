@@ -22,6 +22,10 @@ app.get('/',(req,res)=>{
   res.send('hello world');
 });
 
+app.get('/api', (req, res) => {
+  res.json({ status: 'API working' });
+});
+
 app.use('/user',userRoute);
 app.use('/captain',captainRoutes);
 app.use('/maps',mapsRoutes);
