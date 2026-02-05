@@ -7,8 +7,9 @@ let io;
 function initializeSocket(server) {
     io = socketIo(server, {
         cors: {
-            origin: '*',
-            methods: [ 'GET', 'POST' ]
+            origin: 'https://cab-booking-1-9tva.onrender.com',
+            methods: [ 'GET', 'POST' ],
+            credentials: true
         }
     });
 
