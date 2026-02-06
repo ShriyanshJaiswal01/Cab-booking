@@ -1,4 +1,4 @@
-# Uber Clone Application
+# Cab Booking Application
 
 A full-stack ride-sharing web application built with Node.js/Express backend and React frontend. This project implements real-time ride matching, live tracking, and user authentication for both passengers and captains.
 
